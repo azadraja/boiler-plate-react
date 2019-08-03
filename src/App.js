@@ -1,26 +1,45 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import { history } from './helpers/history';
+import { alertActions } from './actions/alert.actions';
+import { Router, Route } from 'react-router-dom';
+import MainContainer from './containers/MainContainer';
+import { PrivateRoute } from './components/PrivateRoute';
+import { LoginPage } from './containers/LoginPage/LoginPage';
+import { connect } from 'react-redux';
 
-function App() {
+
+class App extends React.Component {
+
+  constructor(props) {
+    super(props);
+
+    const { dispatch } = this.props;
+    history.listen((location, action) => {
+        // clear alert on location change
+        dispatch(alertActions.clear());
+    });
+}
+
+render() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router history={history}>
+        <div>
+            <PrivateRoute exact path="/" component={MainContainer} />
+            <Route path="/login" component={LoginPage} />
+        </div>
+    </Router>
   );
 }
 
-export default App;
+}
+
+function mapStateToProps(state) {
+    const { alert } = state;
+    return {
+        alert
+    };
+}
+
+const connectedApp = connect(mapStateToProps)(App);
+export { connectedApp as App }; 
